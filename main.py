@@ -20,7 +20,7 @@ try:
     # Create a table
     cursor.execute(
         """CREATE TABLE IF NOT EXISTS organizations
-                      (name TEXT, operation_hours TEXT, address TEXT, phone TEXT, link TEXT)"""
+                      (name TEXT, address TEXT, website TEXT, operation_hours TEXT,  contacts TEXT, link TEXT)"""
     )
     conn.commit()
 
@@ -72,35 +72,20 @@ while True:
     logging.info(f"Using proxy: {proxy}")
     prx = {"proxy": proxy}
     with wire_webdriver.Chrome(seleniumwire_options=prx) as driver:
-        conn = sqlite3.connect("data/ya_maps.db")
-        cursor = conn.cursor()
         driver.get(url)
+        time.sleep(1)
         actions = ActionChains(driver)
-        head_names = driver.find_elements(
-            By.CLASS_NAME, "search-business-snippet-view__title"
-        )
-        head_working_hours = driver.find_elements(
-            By.CLASS_NAME, "business-working-status-view"
-        )
-        head_address = driver.find_elements(
-            By.CLASS_NAME, "search-business-snippet-view__address"
-        )
-        time.sleep(10)  # Ensure the page has loaded
+     
 
-        # Process information
-        for name, hours, address in zip(head_names, head_working_hours, head_address):
-            print(name.text, hours.text, address.text)
-            cursor.execute(
-                "INSERT INTO organizations (name, operation_hours, address) VALUES (?,?,?)",
-                (name.text, hours.text, address.text),
-            )
-
-        conn.commit()
+        
+            
+        
 
         # Simulate scrolling on the search page
         slider = driver.find_element(By.CSS_SELECTOR, ".scroll__scrollbar-thumb")
         parent_handle = driver.window_handles[0]
         org_id = 0
+        organizations_href = ""
 
         try:
             # Main scraping loop
@@ -115,13 +100,11 @@ while True:
                     organizations_href = driver.find_elements(
                         By.CLASS_NAME, "search-snippet-view__link-overlay"
                     )
-
-                for organization in organizations_href:
-                    print(organization.text)
+ 
 
                 # Handle organization tabs
                 organization_url = organizations_href[i].get_attribute("href")
-                print(organization_url)
+                
 
                 # Open organization tab
                 driver.execute_script(f'window.open("{organization_url}","org_tab");')
@@ -136,8 +119,22 @@ while True:
                 address = PageScrapper.get_address(soup)
                 website = PageScrapper.get_website(soup)
                 opening_hours = PageScrapper.get_operation_hours(soup)
+                contacts = PageScrapper.get_contacts(soup)
                 link = driver.current_url
+                print(name,address,website, opening_hours, contacts, link)
+                conn = sqlite3.connect("data/ya_maps.db")
+                cursor = conn.cursor()
+               
+                try:
+                    cursor.execute(
+                    "INSERT INTO organizations (name, address, website, operation_hours, contacts, link) VALUES (?,?,?,?,?,?)",
+                    (name, address, website, opening_hours, contacts, link),
+                )
+                except: print("database error")
 
+
+
+                conn.commit()
                 driver.close()
                 driver.switch_to.window(parent_handle)
                 time.sleep(1)

@@ -55,6 +55,21 @@ class PageScrapper(object):
         try:
             for data in soup_content.find_all("meta", {"itemprop": "openingHours"}):
                 opening_hours.append(data.get("content"))
-            return opening_hours
+            opening_hours_str = ','.join(map(str,  opening_hours))
+            return  opening_hours_str
         except Exception:
-            return []
+            return ""
+        
+    @staticmethod
+    def get_contacts(soup_content: BeautifulSoup) -> list:
+        """Retrieve the contacts of the organization."""
+        try:
+            contacts = []
+            for contact in soup_content.find_all(
+                "div", {"class": "card-phones-view__phone-number"}
+            ):
+                contacts.append(contact.getText())
+                contacts_str = ','.join(map(str,  contacts))
+            return contacts_str
+        except Exception:
+            return ""
