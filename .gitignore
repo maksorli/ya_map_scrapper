@@ -4,3 +4,4 @@ config.py
 __pycache__/
 *.code-workspace
 *.txt
+*.scroll.py
