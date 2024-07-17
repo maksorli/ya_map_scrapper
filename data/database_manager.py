@@ -30,6 +30,15 @@ class DatabaseManager:
         except sqlite3.Error as e:
             print(f"Database error: {e}")
 
+    def fetch_all_links(self):
+        try:
+            self.cursor.execute("SELECT link FROM organizations")
+            links = self.cursor.fetchall()  # Fetch all links
+            return [link[0] for link in links if link[0]]  # Return a list of non-empty links
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+            return []
+
     def close(self):
         if self.conn:
             self.conn.close()
