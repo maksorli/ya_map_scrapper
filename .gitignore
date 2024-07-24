@@ -1,0 +1,8 @@
+config.py
+*.db
+*.log
+__pycache__/
+*.code-workspace
+*.txt
+*.scroll.py
+asyncioparse.py
