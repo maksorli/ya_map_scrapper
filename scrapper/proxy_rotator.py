@@ -1,4 +1,6 @@
 import itertools
+
+
 class ProxyRotator:
     """Rotates proxies for each request."""
 
